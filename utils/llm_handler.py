@@ -1,18 +1,12 @@
+import openai
 import os
 import re
-from groq import Groq
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
-# Initialize Groq client
-api_key = os.getenv('GROQ_API_KEY')
-
-if not api_key:
-    raise ValueError("❌ No Groq API key found. Please set GROQ_API_KEY in your .env file")
-
-client = Groq(api_key=api_key)
+# Set up OpenAI API
+openai.api_key = os.getenv('OPENAI_API_KEY')
 
 SYSTEM_PROMPT = """
 🌊 You are OceanGPT, an expert oceanographer's AI assistant! 
@@ -58,44 +52,35 @@ EXAMPLE QUERIES:
 """
 
 def ask_ocean_gpt(question):
-    """Use Groq API to generate SQL from natural language questions"""
+    """Use OpenAI API to generate SQL from natural language questions"""
     try:
-        print(f"🤖 Sending question to Groq: {question[:50]}...")
-        
-        chat_completion = client.chat.completions.create(
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": question}
             ],
-            model="llama3-8b-8192",  # Fast and free!
-            temperature=0.1,
-            max_tokens=500
+            max_tokens=500,
+            temperature=0.1
         )
-        
-        print("✅ Groq response received successfully")
-        return chat_completion.choices[0].message.content
-        
+        return response.choices[0].message.content
     except Exception as e:
-        return f"❌ Error: {str(e)}"
+        return f"Error: {str(e)}"
 
 def extract_sql_from_response(llm_response):
     """Extract SQL from LLM response"""
-    # If there's an error message, return it as is
-    if llm_response.startswith("❌"):
-        return None, llm_response
-    
     # Find SQL code blocks
     sql_pattern = r'```sql\n(.*?)\n```'
     matches = re.findall(sql_pattern, llm_response, re.DOTALL)
     
     if matches:
-        return matches[0].strip(), None
+        return matches[0].strip()
     
     # Fallback: look for SELECT statements
     select_pattern = r'(SELECT.*?;)'
     matches = re.findall(select_pattern, llm_response, re.DOTALL | re.IGNORECASE)
     
     if matches:
-        return matches[0].strip(), None
+        return matches[0].strip()
     
-    return None, "Could not extract SQL from response"
+    return None
