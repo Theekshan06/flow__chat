@@ -2,12 +2,24 @@ import os
 import re
 from groq import Groq
 from dotenv import load_dotenv
+from dotenv import load_dotenv
+from dotenv import load_dotenv
+import os
+
+# Force load .env from project root
+dotenv_path = os.path.join(os.path.dirname(__file__), "..", ".env")
+load_dotenv(dotenv_path=dotenv_path)
+
+api_key = os.getenv("GROQ_API_KEY")
+print("API Key loaded?", bool(api_key))  # Debugging
+
+
 
 # Load environment variables
-load_dotenv()
+#load_dotenv()
 
 # Initialize Groq client
-api_key = os.getenv('GROQ_API_KEY')
+#api_key = os.getenv('GROQ_API_KEY')
 
 if not api_key:
     raise ValueError("❌ No Groq API key found. Please set GROQ_API_KEY in your .env file")

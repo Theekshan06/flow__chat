@@ -2,10 +2,30 @@ import pandas as pd
 from sqlalchemy import create_engine, text
 import os
 from dotenv import load_dotenv
+import json
 
 load_dotenv()
 
 DATABASE_URL = "postgresql://neondb_owner:npg_qV9a3dQRAeBm@ep-still-field-a17hi4xm-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+
+import json
+import os
+
+# Load JSON dataset once when the module is imported
+def load_dataset():
+    dataset_path = os.path.join(os.path.dirname(__file__), "..", "100_FLOATS_REAL_DATA.json")
+    with open(dataset_path, "r") as f:
+        data = json.load(f)
+    return data
+
+# Example query functions
+def get_all_records():
+    data = load_dataset()
+    return data
+
+def filter_by_platform(platform_number: str):
+    data = load_dataset()
+    return [d for d in data if d.get("platform_number") == platform_number]
 
 def get_db_connection():
     """Create and return a database connection"""
